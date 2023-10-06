@@ -15,6 +15,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Author {
 
     @Id
@@ -33,4 +34,7 @@ public class Author {
 
     @OneToMany(mappedBy = "author",cascade = CascadeType.ALL)
     List<Book> books = new ArrayList<>();
+
+
+
 }

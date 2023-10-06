@@ -3,6 +3,7 @@ package com.example.Library.Management.System.service.impl;
 import com.example.Library.Management.System.Enum.Gender;
 import com.example.Library.Management.System.dto.requestDTO.StudentRequest;
 import com.example.Library.Management.System.dto.responsetDTO.StudentResponse;
+import com.example.Library.Management.System.exception.StudentNotFoundException;
 import com.example.Library.Management.System.model.LibraryCard;
 import com.example.Library.Management.System.model.Student;
 import com.example.Library.Management.System.repository.StudentRepository;
@@ -55,4 +56,31 @@ public class StudentService {
         return names;
     }
 
+    public String deleteByRegNo(int regNo) {
+        boolean isPresent= studentRepository.existsById(regNo);
+        if(!isPresent){
+            throw new StudentNotFoundException("Invalid Student Id!");
+        }
+        studentRepository.deleteById(regNo);
+        return "Student Deleted Successfully";
+    }
+    public String updateAge(int regNo, int newAge) {
+        Optional<Student> studentOptional= studentRepository.findById(regNo);
+        if(studentOptional.isEmpty()){
+            throw new StudentNotFoundException("Invalid Registration Number!");
+        }
+        Student student= studentOptional.get();
+        student.setAge(newAge);
+        studentRepository.save(student);
+        return "Age Updated Successfully!";
+    }
+
+    public List<StudentResponse> getAllStudent() {
+        List<Student> students= studentRepository.findAll();
+        List<StudentResponse> studentResponses= new ArrayList<>();
+        for (Student student:students){
+            studentResponses.add(StudentTransformer.StudentToStudentResponse(student));
+        }
+        return studentResponses;
+    }
 }

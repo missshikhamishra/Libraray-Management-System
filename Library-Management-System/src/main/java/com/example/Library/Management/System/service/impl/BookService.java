@@ -1,12 +1,15 @@
 package com.example.Library.Management.System.service.impl;
 
 import com.example.Library.Management.System.Enum.Genre;
+import com.example.Library.Management.System.dto.responsetDTO.AuthorResponse;
 import com.example.Library.Management.System.dto.responsetDTO.BookResponse;
 import com.example.Library.Management.System.exception.AuthorNotFoundException;
+import com.example.Library.Management.System.exception.BookNotAvailableException;
 import com.example.Library.Management.System.model.Author;
 import com.example.Library.Management.System.model.Book;
 import com.example.Library.Management.System.repository.AuthorRepository;
 import com.example.Library.Management.System.repository.BookRepository;
+import com.example.Library.Management.System.transformer.AuthorTransformer;
 import com.example.Library.Management.System.transformer.BookTransformer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -63,5 +66,49 @@ public class BookService {
             response.add(BookTransformer.BookToBookResponse(book));
         }
         return response;
+    }
+    public String deleteBook(int id) {
+        Optional<Book> bookOptional= bookRepository.findById(id);
+        if(bookOptional.isEmpty()){
+            throw new BookNotAvailableException("Invalid Book Id!");
+        }
+        bookRepository.deleteById(id);
+        return "Book Deleted Successfully!";
+    }
+
+    public List<AuthorResponse> GetAllAuthorsWithGenreX(Genre genre) {
+        List<Author> authors=bookRepository.findAllAuthorsWithGenreX(genre);
+        List<AuthorResponse> authorResponses= new ArrayList<>();
+        for (Author author: authors){
+            authorResponses.add(AuthorTransformer.AuthorToAuthorResponse(author));
+        }
+        if (authorResponses.isEmpty()){
+            throw new AuthorNotFoundException("No author present with specific genre!");
+        }
+        return authorResponses;
+    }
+
+    public List<BookResponse> GetBooksHavingPagesBetweenAAndB(int a, int b) {
+        List<Book> books=bookRepository.findBooksHavingPagesBetweenAAndB(a, b);
+        List<BookResponse> bookResponses=new ArrayList<>();
+        for(Book book: books){
+            bookResponses.add(BookTransformer.BookToBookResponse(book));
+        }
+        if(bookResponses.isEmpty()){
+            throw new BookNotAvailableException("No books available of required type!");
+        }
+        return bookResponses;
+    }
+
+    public List<BookResponse> getBookByGenre(Genre genre) {
+        List<Book> books=bookRepository.findByGenre(genre);
+        List<BookResponse> bookResponses=new ArrayList<>();
+        for(Book book: books){
+            bookResponses.add(BookTransformer.BookToBookResponse(book));
+        }
+        if(bookResponses.isEmpty()){
+            throw new BookNotAvailableException("No books available of required genre!");
+        }
+        return bookResponses;
     }
 }
